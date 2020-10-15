@@ -18,22 +18,17 @@ class Audio(commands.Cog):
         self.message_queue = []
 
     async def connect(self):
+        if self.vc is not None:
+            await self.vc.disconnect()
         self.vc = await self.voice_channel.connect()
 
     async def disconnect(self):
-        """Disconnects from vc and resets binding variables"""
+        """Disconnects from vc and clear message queue"""
         await self.vc.disconnect()
-
-        self.author = None
-        self.text_channel = None
-        self.voice_channel = None
-        self.vc = None
-
         self.message_queue = []
 
     @commands.Cog.listener()
     async def on_message(self, m):
-        print(m.content)
         if m.content.startswith(self.bot.command_prefix):  # Ignore commands
             return
 
@@ -51,6 +46,10 @@ class Audio(commands.Cog):
         if member != self.author:
             return
 
+        if after.channel is not None:
+            self.voice_channel = after.channel
+            await self.connect()
+
         if after.channel is None:
             await self.disconnect()
 
@@ -58,13 +57,26 @@ class Audio(commands.Cog):
     async def bind(self, ctx):
         self.author = ctx.author
         self.text_channel = ctx.message.channel
-        self.voice_channel = self.author.voice.channel
 
-        await self.connect()
+        if self.author.voice is not None:
+            self.voice_channel = self.author.voice.channel
+            await self.connect()
+
+        await ctx.send(f'Now listening to {ctx.author}')
 
     @commands.command()
     async def unbind(self, ctx):
+        """Disconnects from vc and resets binding variables"""
         await self.disconnect()
+
+        self.author = None
+        self.text_channel = None
+        self.voice_channel = None
+        self.vc = None
+
+        self.message_queue = []
+
+        await ctx.send(f'No longer listening to {ctx.author}')
 
     async def play(self, text):
         self.save_to_mp3(text, 'test.mp3')
