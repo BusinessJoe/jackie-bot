@@ -1,4 +1,4 @@
-import asyncio
+import os
 
 import discord
 from discord.ext import commands
@@ -19,4 +19,4 @@ class JackieBot(commands.Bot):
 
 if __name__ == '__main__':
     bot = JackieBot(command_prefix='$')
-    bot.run('NzY2MTIwMzk0NjkyMjMxMTc5.X4evNw.DxRfS5qzcGNhy-LKXZYWfxdB06g')
+    bot.run(os.getenv('DISCORD_TOKEN'))
