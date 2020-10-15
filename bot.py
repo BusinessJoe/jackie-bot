@@ -17,7 +17,6 @@ class JackieBot(commands.Bot):
         print('We have logged in as {0.user}'.format(self))
 
 
-
 if __name__ == '__main__':
     bot = JackieBot(command_prefix='$')
     bot.run('NzY2MTIwMzk0NjkyMjMxMTc5.X4evNw.DxRfS5qzcGNhy-LKXZYWfxdB06g')

@@ -37,6 +37,15 @@ class Audio(commands.Cog):
                 m.channel == self.text_channel:
             await self.play(self.voice_channel, m.content)
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        """Disconnect automatically when bound user leaves"""
+        if member != self.author:
+            return
+
+        if after.channel is None:
+            await self.disconnect()
+
     @commands.command()
     async def bind(self, ctx):
         self.author = ctx.author
