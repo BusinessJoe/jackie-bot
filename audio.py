@@ -90,7 +90,8 @@ class Audio(commands.Cog):
     async def play_mp3(self, channel, mp3_path):
         """Plays an mp3 file in a voice channel"""
         self.vc.play(discord.FFmpegPCMAudio(source=mp3_path,
-                                            executable=self.ffmpeg_path))
+                                            executable=self.ffmpeg_path,
+                                            before_options='-guess_layout_max 0'))
 
         while self.vc.is_playing():
             await asyncio.sleep(1)
