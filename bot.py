@@ -2,6 +2,7 @@ import asyncio
 
 import discord
 from discord.ext import commands
+import pyttsx3
 
 
 bot = commands.Bot(command_prefix='$')
@@ -19,11 +20,16 @@ async def test(ctx, arg):
 
 
 @bot.command()
-async def play(ctx):
-    channel = ctx.author.voice.channel
+async def play(ctx, text):
+    save_to_mp3(text, 'test.mp3')
+    await play_mp3(ctx.author.voice.channel, 'test.mp3')
+
+
+async def play_mp3(channel, mp3_path):
+    """Plays an mp3 file in a voice channel"""
     vc = await channel.connect()
 
-    vc.play(discord.FFmpegPCMAudio(source='file_example_MP3_700KB.mp3',
+    vc.play(discord.FFmpegPCMAudio(source=mp3_path,
                                    executable=FFMPEG_PATH),
             after=lambda e: print('done', e))
 
@@ -32,6 +38,16 @@ async def play(ctx):
     vc.stop()
 
     await vc.disconnect()
+
+
+def save_to_mp3(text, filename):
+    """Converts text to speech and saves as mp3"""
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty('voice', voices[1].id)
+    engine.save_to_file(text, filename)
+    engine.runAndWait()
+
 
 
 bot.run('NzY2MTIwMzk0NjkyMjMxMTc5.X4evNw.DxRfS5qzcGNhy-LKXZYWfxdB06g')
