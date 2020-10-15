@@ -2,7 +2,6 @@ import os
 
 import discord
 from discord.ext import commands
-import pyttsx3
 from audio import Audio
 
 FFMPEG_PATH = r'D:\Downloads\ffmpeg-4.3.1-2020-10-01-full_build\bin\ffmpeg.exe'
