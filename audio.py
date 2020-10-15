@@ -15,6 +15,8 @@ class Audio(commands.Cog):
         self.voice_channel = None
         self.vc = None
 
+        self.message_queue = []
+
     async def connect(self):
         self.vc = await self.voice_channel.connect()
 
@@ -27,15 +29,21 @@ class Audio(commands.Cog):
         self.voice_channel = None
         self.vc = None
 
+        self.message_queue = []
+
     @commands.Cog.listener()
     async def on_message(self, m):
+        print(m.content)
         if m.content.startswith(self.bot.command_prefix):  # Ignore commands
             return
 
         if self.vc and \
                 m.author == self.author and \
                 m.channel == self.text_channel:
-            await self.play(self.voice_channel, m.content)
+            self.message_queue.append(m.content)
+
+            if not self.vc.is_playing():
+                await self.play_queue()
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -58,16 +66,19 @@ class Audio(commands.Cog):
     async def unbind(self, ctx):
         await self.disconnect()
 
-    @commands.command()
-    async def play(self, voice_channel, text):
+    async def play(self, text):
         self.save_to_mp3(text, 'test.mp3')
-        await self.play_mp3(voice_channel, 'test.mp3')
+        await self.play_mp3(self.voice_channel, 'test.mp3')
+
+    async def play_queue(self):
+        while self.message_queue:
+            message = self.message_queue.pop(0)
+            await self.play(message)
 
     async def play_mp3(self, channel, mp3_path):
         """Plays an mp3 file in a voice channel"""
         self.vc.play(discord.FFmpegPCMAudio(source=mp3_path,
-                                            executable=self.ffmpeg_path),
-                     after=lambda e: print('done', e))
+                                            executable=self.ffmpeg_path))
 
         while self.vc.is_playing():
             await asyncio.sleep(1)
