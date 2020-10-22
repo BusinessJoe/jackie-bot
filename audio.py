@@ -12,19 +12,25 @@ class Audio(commands.Cog):
 
         self.author = None
         self.text_channel = None
-        self.voice_channel = None
         self.vc = None
 
         self.message_queue = []
 
-    async def connect(self):
-        if self.vc is not None:
-            await self.vc.disconnect()
-        self.vc = await self.voice_channel.connect()
+    async def connect(self, channel):
+        if self.vc is None:
+            print(f'Connecting to {channel}')
+            self.vc = await channel.connect()
+        else:
+            if self.vc.channel != channel:
+                await self.vc.disconnect()
+                print(f'Connecting to {channel}')
+                self.vc = await channel.connect()
 
     async def disconnect(self):
-        """Disconnects from vc and clear message queue"""
+        """Disconnects from vc and clears message queue"""
+        print(f'Disconnecting from {self.vc.channel}')
         await self.vc.disconnect()
+        self.vc = None
         self.message_queue = []
 
     @commands.Cog.listener()
@@ -46,11 +52,13 @@ class Audio(commands.Cog):
         if member != self.author:
             return
 
-        if after.channel is not None:
-            self.voice_channel = after.channel
-            await self.connect()
+        # Ignore changes that keep the member in the same channel
+        if before.channel == after.channel:
+            return
 
-        if after.channel is None:
+        if after.channel is not None:
+            await self.connect(after.channel)
+        else:
             await self.disconnect()
 
     @commands.command()
@@ -59,10 +67,10 @@ class Audio(commands.Cog):
         self.text_channel = ctx.message.channel
 
         if self.author.voice is not None:
-            self.voice_channel = self.author.voice.channel
-            await self.connect()
+            await self.connect(self.author.voice.channel)
 
         await ctx.send(f'Now listening to {ctx.author}')
+        print(f'Bound to {ctx.author}')
 
     @commands.command()
     async def unbind(self, ctx):
@@ -71,7 +79,6 @@ class Audio(commands.Cog):
 
         self.author = None
         self.text_channel = None
-        self.voice_channel = None
         self.vc = None
 
         self.message_queue = []
@@ -80,14 +87,14 @@ class Audio(commands.Cog):
 
     async def play(self, text):
         self.save_to_mp3(text, 'test.mp3')
-        await self.play_mp3(self.voice_channel, 'test.mp3')
+        await self.play_mp3('test.mp3')
 
     async def play_queue(self):
         while self.message_queue:
             message = self.message_queue.pop(0)
             await self.play(message)
 
-    async def play_mp3(self, channel, mp3_path):
+    async def play_mp3(self, mp3_path):
         """Plays an mp3 file in a voice channel"""
         self.vc.play(discord.FFmpegPCMAudio(source=mp3_path,
                                             executable=self.ffmpeg_path,
@@ -102,5 +109,6 @@ class Audio(commands.Cog):
         engine = pyttsx3.init()
         voices = engine.getProperty('voices')
         engine.setProperty('voice', voices[1].id)
+        engine.setProperty('rate', 150)
         engine.save_to_file(text, filename)
         engine.runAndWait()
