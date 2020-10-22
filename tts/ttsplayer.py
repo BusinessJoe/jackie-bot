@@ -5,7 +5,7 @@ from discord.ext import commands
 import pyttsx3
 
 
-class Audio(commands.Cog):
+class TTSPlayer(commands.Cog):
     def __init__(self, bot, ffmpeg_path):
         self.bot = bot
         self.ffmpeg_path = ffmpeg_path
@@ -86,8 +86,8 @@ class Audio(commands.Cog):
         await ctx.send(f'No longer listening to {ctx.author}')
 
     async def play(self, text):
-        self.save_to_mp3(text, 'test.mp3')
-        await self.play_mp3('test.mp3')
+        self.save_to_mp3(text, '../test.mp3')
+        await self.play_mp3('../test.mp3')
 
     async def play_queue(self):
         while self.message_queue:

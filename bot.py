@@ -1,8 +1,7 @@
 import os
 
-import discord
 from discord.ext import commands
-from audio import Audio
+from tts.ttsplayer import TTSPlayer
 
 FFMPEG_PATH = r'D:\Downloads\ffmpeg-4.3.1-2020-10-01-full_build\bin\ffmpeg.exe'
 
@@ -10,7 +9,7 @@ FFMPEG_PATH = r'D:\Downloads\ffmpeg-4.3.1-2020-10-01-full_build\bin\ffmpeg.exe'
 class JackieBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.add_cog(Audio(self, FFMPEG_PATH))
+        self.add_cog(TTSPlayer(self, FFMPEG_PATH))
 
     async def on_ready(self):
         print('We have logged in as {0.user}'.format(self))
