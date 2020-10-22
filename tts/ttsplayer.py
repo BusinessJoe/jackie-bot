@@ -3,11 +3,13 @@ import asyncio
 import discord
 from discord.ext import commands
 import pyttsx3
+from tts.ttssettings import TTSSettings
 
 
 class TTSPlayer(commands.Cog):
     def __init__(self, bot, ffmpeg_path):
         self.bot = bot
+        self.settings = TTSSettings()
         self.ffmpeg_path = ffmpeg_path
 
         self.author = None
@@ -62,6 +64,10 @@ class TTSPlayer(commands.Cog):
             await self.disconnect()
 
     @commands.command()
+    async def ping(self, ctx):
+        await ctx.send('pong')
+
+    @commands.command()
     async def bind(self, ctx):
         self.author = ctx.author
         self.text_channel = ctx.message.channel
@@ -70,6 +76,9 @@ class TTSPlayer(commands.Cog):
             await self.connect(self.author.voice.channel)
 
         await ctx.send(f'Now listening to {ctx.author}')
+
+        if not self.settings.user_exists(self.author.id):
+            self.settings.create_user(self.author.id)
         print(f'Bound to {ctx.author}')
 
     @commands.command()
@@ -85,9 +94,26 @@ class TTSPlayer(commands.Cog):
 
         await ctx.send(f'No longer listening to {ctx.author}')
 
+    @commands.command()
+    async def rate(self, ctx, value: int):
+        self.settings.update_user(ctx.author.id, rate=value)
+
+    @commands.command()
+    async def voice_id(self, ctx, value: int):
+        self.settings.update_user(ctx.author.id, voice_id=value)
+
+    @commands.command()
+    async def volume(self, ctx, value: float):
+        self.settings.update_user(ctx.author.id, volume=value/100)
+
+    @commands.command()
+    async def defaults(self, ctx):
+        self.settings.delete_user(ctx.author.id)
+        self.settings.create_user(ctx.author.id)
+
     async def play(self, text):
-        self.save_to_mp3(text, '../test.mp3')
-        await self.play_mp3('../test.mp3')
+        self.save_to_mp3(text, 'message.mp3')
+        await self.play_mp3('message.mp3')
 
     async def play_queue(self):
         while self.message_queue:
@@ -106,9 +132,12 @@ class TTSPlayer(commands.Cog):
 
     def save_to_mp3(self, text, filename):
         """Converts text to speech and saves as mp3"""
+        user_settings = self.settings.get_user_settings(self.author.id)
+
         engine = pyttsx3.init()
         voices = engine.getProperty('voices')
-        engine.setProperty('voice', voices[1].id)
-        engine.setProperty('rate', 150)
+        engine.setProperty('rate', user_settings['rate'])
+        engine.setProperty('voice', voices[user_settings['voice_id']].id)
+        engine.setProperty('volume', user_settings['volume'])
         engine.save_to_file(text, filename)
         engine.runAndWait()
