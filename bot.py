@@ -16,5 +16,5 @@ class JackieBot(commands.Bot):
 
 
 if __name__ == '__main__':
-    bot = JackieBot(command_prefix='!')
-    bot.run(os.getenv('TEST_DISCORD_TOKEN'))
+    bot = JackieBot(command_prefix='$')
+    bot.run(os.getenv('DISCORD_TOKEN'))
