@@ -131,9 +131,6 @@ class TTSPlayer(commands.Cog):
 
     async def play_mp3(self, mp3_path, guild_id):
         """Plays an mp3 file in a voice channel"""
-        while self.vc[guild_id].is_playing():
-            await asyncio.sleep(1)
-
         self.vc[guild_id].play(discord.FFmpegPCMAudio(source=mp3_path,
                                                       executable=self.ffmpeg_path,
                                                       before_options='-guess_layout_max 0'))
