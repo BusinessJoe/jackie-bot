@@ -3,7 +3,7 @@ import os
 from discord.ext import commands
 from tts.ttsplayer import TTSPlayer
 
-FFMPEG_PATH = r'D:\Downloads\ffmpeg-4.3.1-2020-10-01-full_build\bin\ffmpeg.exe'
+FFMPEG_PATH = r'D:\Downloads\ffmpeg-4.3.1-2021-01-01-full_build\bin\ffmpeg.exe'
 
 
 class JackieBot(commands.Bot):
@@ -16,5 +16,5 @@ class JackieBot(commands.Bot):
 
 
 if __name__ == '__main__':
-    bot = JackieBot(command_prefix='$')
-    bot.run(os.getenv('DISCORD_TOKEN'))
+    bot = JackieBot(command_prefix='!')
+    bot.run(os.getenv('TEST_DISCORD_TOKEN'))
