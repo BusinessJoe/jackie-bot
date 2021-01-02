@@ -1,5 +1,6 @@
 from typing import Dict, List
 import asyncio
+import os
 
 import discord
 from discord.ext import commands
@@ -119,14 +120,16 @@ class TTSPlayer(commands.Cog):
         self.settings.create_user(ctx.author.id)
 
     async def play(self, text, guild_id):
-        self.save_to_mp3(text, f'messages/{guild_id}.mp3', guild_id)
-        await self.play_mp3(f'messages/{guild_id}.mp3', guild_id)
+        filename = f'messages/{guild_id}.mp3'
+        self.save_to_mp3(text, filename, guild_id)
+        await self.play_mp3(filename, guild_id)
+        self.delete_file(filename)
 
     async def play_queue(self, guild_id):
         queue = self.message_queue[guild_id]
         while queue:
             message = queue.pop(0)
-            print(f"Saying '{message}'")
+            print(f"Saying '{message}' in guild {guild_id}")
             await self.play(message, guild_id)
 
     async def play_mp3(self, mp3_path, guild_id):
@@ -150,3 +153,9 @@ class TTSPlayer(commands.Cog):
         engine.setProperty('volume', user_settings['volume'])
         engine.save_to_file(text, filename)
         engine.runAndWait()
+
+    def delete_file(self, filename):
+        try:
+            os.remove(filename)
+        except OSError:
+            pass
