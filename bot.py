@@ -3,7 +3,8 @@ import os
 from discord.ext import commands
 from tts.ttsplayer import TTSPlayer
 
-FFMPEG_PATH = r'D:\Downloads\ffmpeg-4.3.1-2021-01-01-full_build\bin\ffmpeg.exe'
+
+FFMPEG_PATH = os.environ['FFMPEG_PATH']
 
 
 class JackieBot(commands.Bot):
